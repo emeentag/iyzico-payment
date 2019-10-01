@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<iyzico-challenge>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.iyzico.challenge.Application",
+            "projectName": "iyzico-challenge",
+            "args": ""
+        }
+    ]
+}
