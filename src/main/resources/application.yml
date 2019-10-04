@@ -1,6 +1,9 @@
 server:
   port: 8080
 spring:
+  output:
+    ansi:
+      enabled: ALWAYS
   datasource:
     url: jdbc:hsqldb:hsql:/localhost:9001/db
     driverClassName: org.hsqldb.jdbcDriver

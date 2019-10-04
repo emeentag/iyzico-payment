@@ -1,5 +1,10 @@
 package com.iyzico.challenge.service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,12 +12,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 @EnableAutoConfiguration
 @RunWith(SpringRunner.class)
@@ -25,7 +24,7 @@ public class IyzicoPaymentServiceTest {
 
     @Test
     public void should_pay_with_iyzico_with_100_clients_together() {
-        List<CompletableFuture> futures = new ArrayList<>();
+        List<CompletableFuture<String>> futures = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             CompletableFuture<String> future = paymentServiceClients.call(new BigDecimal(i));
             futures.add(future);
