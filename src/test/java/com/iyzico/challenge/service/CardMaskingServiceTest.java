@@ -1,20 +1,19 @@
 package com.iyzico.challenge.service;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
-//TODO: add new test cases for edge cases
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class CardMaskingServiceTest {
 
+    @Autowired
     private CardMaskingService cardMaskingService;
-
-    @Before
-    public void setUp() {
-        cardMaskingService = new CardMaskingService();
-    }
 
     @Test
     public void should_mask_digits_for_basic_credit_cards() {
@@ -50,5 +49,20 @@ public class CardMaskingServiceTest {
 
         //then
         assertThat(maskedCardNumber).isEqualTo("John Doe");
+    }
+
+    @Test
+    public void should_return_provided_card_number_if_not_valid() {
+        //given
+        String cardNumber = "4729150000005";
+        String formattedCardNumber = "4729-150-0000-005";
+
+        //when
+        String maskedCardNumber = cardMaskingService.maskCardNumber(cardNumber);
+        String maskedFormattedCardNumber = cardMaskingService.maskCardNumber(formattedCardNumber);
+
+        //then
+        assertThat(maskedCardNumber).isEqualTo("4729150000005");
+        assertThat(maskedFormattedCardNumber).isEqualTo("4729-150-0000-005");
     }
 }
