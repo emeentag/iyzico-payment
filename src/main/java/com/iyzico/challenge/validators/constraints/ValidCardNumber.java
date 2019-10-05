@@ -16,7 +16,7 @@ import com.iyzico.challenge.validators.CardNumberValidator;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE,ElementType.TYPE_PARAMETER,ElementType.TYPE_USE})
+@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER })
 @Constraint(validatedBy = CardNumberValidator.class)
 public @interface ValidCardNumber {
 
@@ -24,5 +24,5 @@ public @interface ValidCardNumber {
 
   Class<?>[] groups() default {};
 
-  Class<? extends Payload>[] payload() default {}; 
+  Class<? extends Payload>[] payload() default {};
 }
