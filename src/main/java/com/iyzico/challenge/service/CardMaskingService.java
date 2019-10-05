@@ -1,46 +1,25 @@
 package com.iyzico.challenge.service;
 
+import com.iyzico.challenge.validators.CardNumberValidator;
+
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class CardMaskingService {
 
     public String maskCardNumber(String cardNumber) {
 
-        boolean isFormatted = isFormattedCardNumber(cardNumber);
+        CardNumberValidator cardNumberValidator = new CardNumberValidator();
 
-        boolean isValid = isValidCardNumber(cardNumber, isFormatted);
-
-        if (isValid) {
-
-            cardNumber = mask(cardNumber, isFormatted);
+        if (cardNumberValidator.isValidCardNumber(cardNumber)) {
+            cardNumber = mask(cardNumber, cardNumberValidator.isFormattedCardNumber(cardNumber));
+        } else {
+            log.info("Card is not valid!");
         }
         return cardNumber;
-    }
-
-    private boolean isValidCardNumber(String cardNumber, boolean isFormatted) {
-        boolean isValid = false;
-        int minLength = 15;
-        int maxLength = 16;
-
-        if (isFormatted) {
-            cardNumber = cardNumber.replace("-", "");
-        }
-
-        if ((cardNumber.length() == minLength || cardNumber.length() == maxLength) && cardNumber.matches("^[0-9]*$")) {
-            isValid = true;
-        }
-        return isValid;
-    }
-
-    /**
-     * If card number is not only numbers then it is formatted.
-     * 
-     * @param cardNumber
-     * @return
-     */
-    private boolean isFormattedCardNumber(String cardNumber) {
-        return !cardNumber.matches("^[0-9]*$");
     }
 
     private String mask(String cardNumber, boolean isFormatted) {
@@ -50,14 +29,10 @@ public class CardMaskingService {
         int endIndex = cardNumber.length() - 4;
         String inBetween = sBuilder.substring(startIndex, endIndex);
 
-        if (isFormatted) {
-            inBetween = inBetween.replaceAll("[^-]", "*");
-
-        } else {
-            inBetween = inBetween.replaceAll("[0-9]", "*");
-        }
+        inBetween = inBetween.replaceAll("[0-9]", "*");
 
         sBuilder.replace(startIndex, endIndex, inBetween);
+
         return sBuilder.toString();
     }
 }

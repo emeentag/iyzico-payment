@@ -1,9 +1,11 @@
-package com.iyzico.challenge.service;
+package com.iyzico.challenge.integrations.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import com.iyzico.challenge.service.PaymentServiceClients;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

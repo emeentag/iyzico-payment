@@ -1,6 +1,8 @@
-package com.iyzico.challenge.service;
+package com.iyzico.challenge.integrations.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import com.iyzico.challenge.service.CardMaskingService;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
