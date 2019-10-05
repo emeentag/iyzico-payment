@@ -1,4 +1,4 @@
-package com.iyzico.challenge.integrations.service;
+package com.iyzico.challenge.integration.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
