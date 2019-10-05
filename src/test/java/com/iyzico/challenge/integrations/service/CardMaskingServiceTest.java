@@ -56,20 +56,20 @@ public class CardMaskingServiceTest {
     @Test
     public void should_return_provided_card_number_if_not_valid() {
         //given
-        String cardNumber = "4729150000005";
-        String formattedCardNumber = "4729-150-0000-005";
+        String lessThan15NumCardNumber = "4729150000005";
+        String lessThan15NumFormattedCardNumber = "4729-150-0000-005";
         String malformedCardNumber = "47291500A0000005";
         String malformedFormattedCardNumber = "4729-1D00-0000-0005";
 
         //when
-        String maskedCardNumber = cardMaskingService.maskCardNumber(cardNumber);
-        String maskedFormattedCardNumber = cardMaskingService.maskCardNumber(formattedCardNumber);
+        String maskedCardNumber = cardMaskingService.maskCardNumber(lessThan15NumCardNumber);
+        String maskedFormattedCardNumber = cardMaskingService.maskCardNumber(lessThan15NumFormattedCardNumber);
         String maskedMalformedCardNumber = cardMaskingService.maskCardNumber(malformedCardNumber);
         String maskedMalformedFormattedCardNumber = cardMaskingService.maskCardNumber(malformedFormattedCardNumber);
 
         //then
-        assertThat(maskedCardNumber).isEqualTo(cardNumber);
-        assertThat(maskedFormattedCardNumber).isEqualTo(formattedCardNumber);
+        assertThat(maskedCardNumber).isEqualTo(lessThan15NumCardNumber);
+        assertThat(maskedFormattedCardNumber).isEqualTo(lessThan15NumFormattedCardNumber);
         assertThat(maskedMalformedCardNumber).isEqualTo(malformedCardNumber);
         assertThat(maskedMalformedFormattedCardNumber).isEqualTo(malformedFormattedCardNumber);
     }
