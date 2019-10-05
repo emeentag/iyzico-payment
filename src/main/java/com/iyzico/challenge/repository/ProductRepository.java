@@ -1,9 +1,14 @@
 package com.iyzico.challenge.repository;
 
-import com.iyzico.challenge.entity.Payment;
+import com.iyzico.challenge.entity.Product;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+/**
+ * ProductRepository
+ */
 @Repository
-public interface PaymentRepository extends JpaRepository<Payment, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long> {
+
 }

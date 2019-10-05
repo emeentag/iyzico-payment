@@ -1,4 +1,4 @@
-package com.iyzico.challenge.unit;
+package com.iyzico.challenge.unit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
