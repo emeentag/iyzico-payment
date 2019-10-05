@@ -1,4 +1,4 @@
-package com.iyzico.challenge.validators.constraints;
+package com.iyzico.challenge.validator.constraint;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -9,7 +9,8 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import com.iyzico.challenge.validators.CardNumberValidator;
+import com.iyzico.challenge.validator.CardNumberValidator;
+
 
 /**
  * ValidCardNumber

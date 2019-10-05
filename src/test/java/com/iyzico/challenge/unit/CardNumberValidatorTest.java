@@ -2,7 +2,7 @@ package com.iyzico.challenge.unit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.iyzico.challenge.validators.CardNumberValidator;
+import com.iyzico.challenge.validator.CardNumberValidator;
 
 import org.junit.Before;
 import org.junit.Test;
