@@ -56,13 +56,19 @@ public class CardMaskingServiceTest {
         //given
         String cardNumber = "4729150000005";
         String formattedCardNumber = "4729-150-0000-005";
+        String malformedCardNumber = "47291500A0000005";
+        String malformedFormattedCardNumber = "4729-1D00-0000-0005";
 
         //when
         String maskedCardNumber = cardMaskingService.maskCardNumber(cardNumber);
         String maskedFormattedCardNumber = cardMaskingService.maskCardNumber(formattedCardNumber);
+        String maskedMalformedCardNumber = cardMaskingService.maskCardNumber(malformedCardNumber);
+        String maskedMalformedFormattedCardNumber = cardMaskingService.maskCardNumber(malformedFormattedCardNumber);
 
         //then
-        assertThat(maskedCardNumber).isEqualTo("4729150000005");
-        assertThat(maskedFormattedCardNumber).isEqualTo("4729-150-0000-005");
+        assertThat(maskedCardNumber).isEqualTo(cardNumber);
+        assertThat(maskedFormattedCardNumber).isEqualTo(formattedCardNumber);
+        assertThat(maskedMalformedCardNumber).isEqualTo(malformedCardNumber);
+        assertThat(maskedMalformedFormattedCardNumber).isEqualTo(malformedFormattedCardNumber);
     }
 }
