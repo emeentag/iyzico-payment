@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -16,6 +17,7 @@ import lombok.Data;
  */
 @Entity
 @Data
+@AllArgsConstructor
 public class Product {
 
   @Id

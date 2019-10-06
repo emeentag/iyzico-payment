@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
 
 /**
  * Basket
@@ -24,6 +25,10 @@ public class Basket {
   @Id
   @GeneratedValue
   private Long id;
+
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "member_id", referencedColumnName = "id")
+  private Member member;
 
   @ManyToMany(cascade = CascadeType.ALL)
   @JoinTable(name = "basket_product", joinColumns = {

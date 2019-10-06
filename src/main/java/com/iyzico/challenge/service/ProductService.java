@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import com.iyzico.challenge.entity.Product;
 import com.iyzico.challenge.repository.ProductRepository;
+import com.iyzipay.model.BasketItem;
+import com.iyzipay.model.BasketItemType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -76,5 +78,16 @@ public class ProductService {
     }
 
     return returnString;
+  }
+
+  public BasketItem toBasketItem(Product product, BasketItemType type) {
+    BasketItem basketItem = new BasketItem();
+
+    basketItem.setId("SS" + product.getId());
+    basketItem.setName(product.getName());
+    basketItem.setItemType(type.name());
+    basketItem.setPrice(product.getPrice());
+
+    return basketItem;
   }
 }
