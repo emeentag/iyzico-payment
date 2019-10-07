@@ -1,5 +1,6 @@
 package com.iyzico.challenge.entity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -15,7 +16,6 @@ import javax.persistence.ManyToOne;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Basket
@@ -23,7 +23,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class Basket {
 
   public enum BasketStatus {
@@ -46,4 +45,8 @@ public class Basket {
 
   @Enumerated(EnumType.STRING)
   private BasketStatus status = BasketStatus.NOT_PAYED;
+
+  public Basket() {
+    this.products = new HashSet<>();
+  }
 }

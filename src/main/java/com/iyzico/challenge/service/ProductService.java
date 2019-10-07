@@ -3,6 +3,7 @@ package com.iyzico.challenge.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.iyzico.challenge.configuration.ApplicationConfiguration;
 import com.iyzico.challenge.entity.Product;
 import com.iyzico.challenge.repository.ProductRepository;
 import com.iyzipay.model.BasketItem;
@@ -23,6 +24,9 @@ public class ProductService {
   @Autowired
   public ProductRepository productRepository;
 
+  @Autowired
+  public ApplicationConfiguration applicationConfiguration;
+
   public Optional<Product> addProduct(Product product) {
     Optional<Product> returnProduct = Optional.empty();
 
@@ -41,7 +45,7 @@ public class ProductService {
   }
 
   public List<Product> getProducts(int page) {
-    Pageable resultForCurrentPage = PageRequest.of(page, 10);
+    Pageable resultForCurrentPage = PageRequest.of(page, this.applicationConfiguration.getItemsInSinglePage());
 
     Page<Product> returnProducts = this.productRepository.findAll(resultForCurrentPage);
 

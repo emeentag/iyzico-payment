@@ -1,5 +1,6 @@
 package com.iyzico.challenge.entity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -32,4 +33,8 @@ public class Member {
 
   @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
   private Set<Basket> baskets;
+
+  public Member() {
+    this.baskets = new HashSet<>();
+  }
 }

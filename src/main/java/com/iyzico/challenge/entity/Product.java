@@ -1,7 +1,7 @@
 package com.iyzico.challenge.entity;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -12,6 +12,7 @@ import javax.persistence.ManyToMany;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Product
@@ -39,4 +40,8 @@ public class Product {
 
   @ManyToMany(mappedBy = "products")
   private Set<Basket> baskets;
+
+  public Product() {
+    this.baskets = new HashSet<>();
+  }
 }

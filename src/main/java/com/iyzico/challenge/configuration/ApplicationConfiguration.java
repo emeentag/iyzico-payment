@@ -23,4 +23,7 @@ public class ApplicationConfiguration {
     @Value("${spring.application.payment.apiUrl}")
     private String paymentApiUrl;
 
+    @Value("${spting.application.itemsInSinglePage}")
+    private Integer itemsInSinglePage;
+
 }
