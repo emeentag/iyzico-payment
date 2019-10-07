@@ -1,10 +1,7 @@
 package com.iyzico.challenge.service;
 
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.iyzico.challenge.entity.Basket;
 import com.iyzico.challenge.entity.Basket.BasketStatus;
@@ -13,17 +10,7 @@ import com.iyzico.challenge.entity.Product;
 import com.iyzico.challenge.repository.BasketRepository;
 import com.iyzico.challenge.repository.MemberRepository;
 import com.iyzico.challenge.repository.ProductRepository;
-import com.iyzipay.Options;
-import com.iyzipay.model.Address;
-import com.iyzipay.model.BasketItem;
-import com.iyzipay.model.BasketItemType;
-import com.iyzipay.model.Currency;
-import com.iyzipay.model.Locale;
 import com.iyzipay.model.Payment;
-import com.iyzipay.model.PaymentCard;
-import com.iyzipay.model.PaymentChannel;
-import com.iyzipay.model.PaymentGroup;
-import com.iyzipay.request.CreatePaymentRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,12 +40,17 @@ public class BasketService {
   @Autowired
   public MemberService memberService;
 
+  @Autowired
+  public PaymentService paymentService;
+
   public Optional<Basket> getBasket(Long basketId, Long memberId) {
     Optional<Member> member = this.memberRepository.findById(memberId);
-    Optional<Basket> basket = this.basketRepository.findById(basketId);
+    Optional<Basket> basket = this.basketRepository.findByIdAndMember(basketId, member.get());
 
-    if (!isBasketBelongsToMember(member, basket)) {
+    if (!basket.isPresent()) {
       return Optional.empty();
+    } else {
+      log.info("Basket not found!");
     }
 
     return basket;
@@ -129,9 +121,9 @@ public class BasketService {
   public Optional<Basket> buyBasket(Long basketId, Long memberId) {
 
     Optional<Member> member = this.memberRepository.findById(memberId);
-    Optional<Basket> basket = this.basketRepository.findById(basketId);
+    Optional<Basket> basket = this.basketRepository.findByIdAndMember(basketId, member.get());
 
-    if (isBasketBelongsToMember(member, basket)) {
+    if (basket.isPresent()) {
 
       Basket basketEntity = basket.get();
 
@@ -142,11 +134,11 @@ public class BasketService {
           if (inStock(products)) {
 
             // Purchase
-            Payment payment = completePurchase(basketEntity);
+            Payment payment = this.paymentService.pay(basketEntity);
 
             if (payment.getStatus().equalsIgnoreCase("success")) {
-              
-              // Update stock number.
+
+              // Update stock count.
               updateStock(products);
 
               // Close the basket.
@@ -162,66 +154,11 @@ public class BasketService {
           log.error("There is no product in basket.");
         }
       }
+    } else {
+      log.info("Basket not found!");
     }
 
     return basket;
-  }
-
-  private Payment completePurchase(Basket basketEntity) {
-
-    Options options = new Options();
-    options.setApiKey("sandbox-Hx6DvxaWsTe8KkX9IixOCLhdye4YrzoA");
-    options.setSecretKey("sandbox-SxBzSskY6zIg038BcqoUNzUxyVL1FnFU");
-    options.setBaseUrl("https://sandbox-api.iyzipay.com");
-
-    // This is just for a dummy payment.
-    CreatePaymentRequest request = new CreatePaymentRequest();
-    request.setLocale(Locale.TR.getValue());
-    request.setConversationId("123456789");
-    request.setPrice(new BigDecimal("1"));
-    request.setPaidPrice(new BigDecimal("1.2"));
-    request.setCurrency(Currency.TRY.name());
-    request.setInstallment(1);
-    request.setBasketId("B67832");
-    request.setPaymentChannel(PaymentChannel.WEB.name());
-    request.setPaymentGroup(PaymentGroup.PRODUCT.name());
-
-    Set<Product> products = basketEntity.getProducts();
-    List<BasketItem> basketItems = products.stream()
-        .map(p -> this.productService.toBasketItem(p, BasketItemType.PHYSICAL)).collect(Collectors.toList());
-
-    request.setBasketItems(basketItems);
-
-    PaymentCard paymentCard = new PaymentCard();
-    paymentCard.setCardHolderName("John Doe");
-    paymentCard.setCardNumber("5528790000000008");
-    paymentCard.setExpireMonth("12");
-    paymentCard.setExpireYear("2030");
-    paymentCard.setCvc("123");
-    paymentCard.setRegisterCard(0);
-    request.setPaymentCard(paymentCard);
-
-    request.setBuyer(this.memberService.toBuyer(basketEntity.getMember()));
-
-    Address shippingAddress = new Address();
-    shippingAddress.setContactName("Jane Doe");
-    shippingAddress.setCity("Istanbul");
-    shippingAddress.setCountry("Turkey");
-    shippingAddress.setAddress("Nidakule Göztepe, Merdivenköy Mah. Bora Sok. No:1");
-    shippingAddress.setZipCode("34742");
-    request.setShippingAddress(shippingAddress);
-
-    Address billingAddress = new Address();
-    billingAddress.setContactName("Jane Doe");
-    billingAddress.setCity("Istanbul");
-    billingAddress.setCountry("Turkey");
-    billingAddress.setAddress("Nidakule Göztepe, Merdivenköy Mah. Bora Sok. No:1");
-    billingAddress.setZipCode("34742");
-    request.setBillingAddress(billingAddress);
-
-    Payment payment = Payment.create(request, options);
-
-    return payment;
   }
 
   private Set<Product> updateStock(Set<Product> products) {
@@ -245,23 +182,5 @@ public class BasketService {
       }
     }
     return true;
-  }
-
-  private boolean isBasketBelongsToMember(Optional<Member> member, Optional<Basket> basket) {
-    if (member.isPresent() && basket.isPresent()) {
-
-      Basket basketEntity = basket.get();
-      Member memberEntity = member.get();
-
-      if (!memberEntity.equals(basketEntity.getMember())) {
-        return true;
-      } else {
-        log.info("This basket does not belong to that member!");
-      }
-    } else {
-      log.info("There is no basket or member with these ids!");
-    }
-
-    return false;
   }
 }
