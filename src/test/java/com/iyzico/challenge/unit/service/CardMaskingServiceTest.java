@@ -18,63 +18,63 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest(CardMaskingService.class)
 public class CardMaskingServiceTest {
 
-    private CardMaskingService cardMaskingService;
+  private CardMaskingService cardMaskingService;
 
-    @Mock
-    private CardNumberValidator cardNumberValidator;
+  @Mock
+  private CardNumberValidator cardNumberValidator;
 
-    @Before
-    public void setUp() {
-        cardMaskingService = new CardMaskingService();
-    }
+  @Before
+  public void setUp() {
+    cardMaskingService = new CardMaskingService();
+  }
 
-    @Test
-    public void should_mask_digits_for_basic_credit_cards() throws Exception {
-        // given
-        String cardNumber = "4729150000000005";
-        
-        Mockito.when(cardNumberValidator.isValidCardNumber(cardNumber)).thenReturn(true);
-        Mockito.when(cardNumberValidator.isFormattedCardNumber(cardNumber)).thenReturn(false);
+  @Test
+  public void should_mask_digits_for_basic_credit_cards() throws Exception {
+    // given
+    String cardNumber = "4729150000000005";
 
-        PowerMockito.whenNew(CardNumberValidator.class).withNoArguments().thenReturn(cardNumberValidator);
+    Mockito.when(cardNumberValidator.isValidCardNumber(cardNumber)).thenReturn(true);
+    Mockito.when(cardNumberValidator.isFormattedCardNumber(cardNumber)).thenReturn(false);
 
-        // when
-        String maskedCardNumber = cardMaskingService.maskCardNumber(cardNumber);
+    PowerMockito.whenNew(CardNumberValidator.class).withNoArguments().thenReturn(cardNumberValidator);
 
-        // then
-        assertThat(maskedCardNumber).isEqualTo("472915******0005");
-    }
+    // when
+    String maskedCardNumber = cardMaskingService.maskCardNumber(cardNumber);
 
-    @Test
-    public void should_mask_digits_for_credit_cards_in_different_format() throws Exception {
-        // given
-        String cardNumber = "4729-1500-0000-0005";
+    // then
+    assertThat(maskedCardNumber).isEqualTo("472915******0005");
+  }
 
-        Mockito.when(cardNumberValidator.isValidCardNumber(cardNumber)).thenReturn(true);
-        Mockito.when(cardNumberValidator.isFormattedCardNumber(cardNumber)).thenReturn(true);
+  @Test
+  public void should_mask_digits_for_credit_cards_in_different_format() throws Exception {
+    // given
+    String cardNumber = "4729-1500-0000-0005";
 
-        PowerMockito.whenNew(CardNumberValidator.class).withAnyArguments().thenReturn(cardNumberValidator);
+    Mockito.when(cardNumberValidator.isValidCardNumber(cardNumber)).thenReturn(true);
+    Mockito.when(cardNumberValidator.isFormattedCardNumber(cardNumber)).thenReturn(true);
 
-        // when
-        String maskedCardNumber = cardMaskingService.maskCardNumber(cardNumber);
+    PowerMockito.whenNew(CardNumberValidator.class).withAnyArguments().thenReturn(cardNumberValidator);
 
-        // then
-        assertThat(maskedCardNumber).isEqualTo("4729-15**-****-0005");
-    }
+    // when
+    String maskedCardNumber = cardMaskingService.maskCardNumber(cardNumber);
 
-    @Test
-    public void should_not_mask_anything_for_non_numeric_characters() throws Exception {
-        // given
-        String cardNumber = "John Doe";
+    // then
+    assertThat(maskedCardNumber).isEqualTo("4729-15**-****-0005");
+  }
 
-        Mockito.when(cardNumberValidator.isValidCardNumber(cardNumber)).thenReturn(false);
+  @Test
+  public void should_not_mask_anything_for_non_numeric_characters() throws Exception {
+    // given
+    String cardNumber = "John Doe";
 
-        PowerMockito.whenNew(CardNumberValidator.class).withNoArguments().thenReturn(cardNumberValidator);
+    Mockito.when(cardNumberValidator.isValidCardNumber(cardNumber)).thenReturn(false);
 
-        // when
-        String maskedCardNumber = cardMaskingService.maskCardNumber(cardNumber);
+    PowerMockito.whenNew(CardNumberValidator.class).withNoArguments().thenReturn(cardNumberValidator);
 
-        // then
-        assertThat(maskedCardNumber).isEqualTo("John Doe");
-    }
+    // when
+    String maskedCardNumber = cardMaskingService.maskCardNumber(cardNumber);
+
+    // then
+    assertThat(maskedCardNumber).isEqualTo("John Doe");
+  }
 }

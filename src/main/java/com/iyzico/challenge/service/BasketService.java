@@ -145,14 +145,20 @@ public class BasketService {
               basketEntity.setStatus(BasketStatus.PAYED);
               this.basketRepository.save(basketEntity);
             } else {
-              log.error("Payment failed with error" + payment.getErrorCode() + ":" + payment.getErrorMessage());
+              basket = Optional.empty();
+              log.info("Payment failed with error" + payment.getErrorCode() + ":" + payment.getErrorMessage());
             }
           } else {
-            log.error("Product out of stock.");
+            basket = Optional.empty();
+            log.info("Product out of stock.");
           }
         } else {
-          log.error("There is no product in basket.");
+          basket = Optional.empty();
+          log.info("There is no product in basket.");
         }
+      } else {
+        basket = Optional.empty();
+        log.info("Basket status not valid.");
       }
     } else {
       log.info("Basket not found!");

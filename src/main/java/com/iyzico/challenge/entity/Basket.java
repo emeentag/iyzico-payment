@@ -13,13 +13,17 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Basket
  */
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Basket {
 
   public enum BasketStatus {
