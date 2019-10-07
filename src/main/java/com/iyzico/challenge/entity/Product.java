@@ -2,6 +2,7 @@ package com.iyzico.challenge.entity;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,7 +28,7 @@ public class Product {
   @Column(name = "name", columnDefinition = "VARCHAR(120)", nullable = false)
   private String name;
 
-  @Column(name = "details", columnDefinition = "TEXT", nullable = true)
+  @Column(name = "details", columnDefinition = "VARCHAR(255)", nullable = true)
   private String details;
 
   @Column(name = "price", columnDefinition = "DECIMAL", nullable = false)
@@ -37,5 +38,5 @@ public class Product {
   private Long stockCount;
 
   @ManyToMany(mappedBy = "products")
-  private List<Basket> baskets;
+  private Set<Basket> baskets;
 }

@@ -142,29 +142,30 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void deleteProduct_should_return_deleted_when_there_is_sth_do_delete() throws Exception {
+  public void deleteProduct_should_return_product_when_there_is_sth_do_delete() throws Exception {
     // given
     Product product = productWithId;
     Mockito.when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
     // when
-    String returnString = productService.deleteProduct(product.getId());
+    Optional<Product> returnProduct = productService.deleteProduct(product.getId());
 
     // then
-    assertThat(returnString).isEqualTo("Deleted.");
+    assertThat(returnProduct).isEqualTo(returnProduct);
   }
 
   @Test
-  public void deleteProduct_should_return_not_deleted_when_there_is_sth_do_delete() throws Exception {
+  public void deleteProduct_should_return_empty_when_there_is_sth_do_delete() throws Exception {
     // given
     Product product = productWithId;
     Mockito.when(productRepository.findById(product.getId())).thenReturn(Optional.empty());
 
     // when
-    String returnString = productService.deleteProduct(product.getId());
+    Optional<Product> returnProduct = productService.deleteProduct(product.getId());
 
     // then
-    assertThat(returnString).isEqualTo("No product to delete.");
+    assertThat(returnProduct).isEmpty();
+    ;
   }
 
   @Test

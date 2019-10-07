@@ -23,17 +23,17 @@ public class MemberController {
     return null;
   }
 
-  @PostMapping(value = "/member", consumes = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/member", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_HTML_VALUE)
   public ResponseEntity<String> addMember(@RequestBody Member member) {
     return null;
   }
 
-  @PutMapping(value = "/member", consumes = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/member", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_HTML_VALUE)
   public ResponseEntity<String> updateMember(@RequestBody Member member) {
     return null;
   }
 
-  @DeleteMapping(value = "/member")
+  @DeleteMapping(value = "/member", produces = MediaType.TEXT_HTML_VALUE)
   public ResponseEntity<String> deleteMember(@RequestParam(required = true, name = "id") Long id) {
     return null;
   }

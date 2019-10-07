@@ -1,5 +1,8 @@
 package com.iyzico.challenge.entity;
 
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,6 +30,6 @@ public class Member {
   @Column(name = "email", columnDefinition = "VARCHAR(120)")
   private String email;
 
-  @OneToMany(mappedBy = "user")
-  private Basket basket;
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+  private Set<Basket> baskets;
 }

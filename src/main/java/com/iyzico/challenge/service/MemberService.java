@@ -51,20 +51,15 @@ public class MemberService {
     return returnMember;
   }
 
-  public String deleteMember(Long memberId) {
-
-    String returnString;
+  public Optional<Member> deleteMember(Long memberId) {
 
     Optional<Member> returnMember = this.memberRepository.findById(memberId);
 
     if (returnMember.isPresent()) {
       this.memberRepository.delete(returnMember.get());
-      returnString = "Deleted.";
-    } else {
-      returnString = "No member to delete.";
     }
 
-    return returnString;
+    return returnMember;
   }
 
   public Buyer toBuyer(Member member) {

@@ -121,29 +121,29 @@ public class MemberServiceTest {
   }
 
   @Test
-  public void deleteMember_should_return_deleted_when_there_is_sth_do_delete() throws Exception {
+  public void deleteMember_should_return_member_when_there_is_sth_do_delete() throws Exception {
     // given
     Member member = memberWithId;
     Mockito.when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
     // when
-    String returnString = memberService.deleteMember(member.getId());
+    Optional<Member> returnMember = memberService.deleteMember(member.getId());
 
     // then
-    assertThat(returnString).isEqualTo("Deleted.");
+    assertThat(returnMember).isEqualTo(returnMember);
   }
 
   @Test
-  public void deleteMember_should_return_not_deleted_when_there_is_sth_do_delete() throws Exception {
+  public void deleteMember_should_return_empty_when_there_is_sth_do_delete() throws Exception {
     // given
     Member member = memberWithId;
     Mockito.when(memberRepository.findById(member.getId())).thenReturn(Optional.empty());
 
     // when
-    String returnString = memberService.deleteMember(member.getId());
+    Optional<Member> returnMember = memberService.deleteMember(member.getId());
 
     // then
-    assertThat(returnString).isEqualTo("No member to delete.");
+    assertThat(returnMember).isEmpty();
   }
 
   @Test

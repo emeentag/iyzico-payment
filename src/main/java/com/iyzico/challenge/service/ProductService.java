@@ -64,20 +64,15 @@ public class ProductService {
     return returnProduct;
   }
 
-  public String deleteProduct(Long productId) {
-
-    String returnString;
+  public Optional<Product> deleteProduct(Long productId) {
 
     Optional<Product> returnProduct = this.productRepository.findById(productId);
 
     if (returnProduct.isPresent()) {
       this.productRepository.delete(returnProduct.get());
-      returnString = "Deleted.";
-    } else {
-      returnString = "No product to delete.";
     }
 
-    return returnString;
+    return returnProduct;
   }
 
   public BasketItem toBasketItem(Product product, BasketItemType type) {

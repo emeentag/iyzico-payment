@@ -1,24 +1,28 @@
 package com.iyzico.challenge.entity;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
+
+import lombok.Data;
 
 /**
  * Basket
  */
 @Entity
+@Data
 public class Basket {
 
-  private enum BasketStatus {
+  public enum BasketStatus {
     NOT_PAYED, PAYED
   }
 
@@ -26,7 +30,7 @@ public class Basket {
   @GeneratedValue
   private Long id;
 
-  @OneToOne(cascade = CascadeType.ALL)
+  @ManyToOne
   @JoinColumn(name = "member_id", referencedColumnName = "id")
   private Member member;
 
@@ -34,8 +38,8 @@ public class Basket {
   @JoinTable(name = "basket_product", joinColumns = {
       @JoinColumn(name = "basket_id", referencedColumnName = "id") }, inverseJoinColumns = {
           @JoinColumn(name = "product_id", referencedColumnName = "id") })
-  private List<Product> products;
+  private Set<Product> products;
 
-  @Enumerated
+  @Enumerated(EnumType.STRING)
   private BasketStatus status = BasketStatus.NOT_PAYED;
 }
