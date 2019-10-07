@@ -37,15 +37,12 @@ public class MemberService {
 
   public Optional<Member> updateMember(Member member) {
 
-    Long memberId = member.getId();
-    Optional<Member> returnMember = Optional.empty();
+    Optional<Member> returnMember = this.memberRepository.findById(member.getId());
 
-    if (memberId != null) {
-      returnMember = this.memberRepository.findById(memberId);
+    if (returnMember.isPresent()) {
+      member = this.memberRepository.save(member);
 
-      if (returnMember.isPresent()) {
-        this.memberRepository.save(member);
-      }
+      returnMember = Optional.of(member);
     }
 
     return returnMember;

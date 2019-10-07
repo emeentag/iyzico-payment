@@ -54,15 +54,12 @@ public class ProductService {
 
   public Optional<Product> updateProduct(Product product) {
 
-    Long productId = product.getId();
-    Optional<Product> returnProduct = Optional.empty();
+    Optional<Product> returnProduct = this.productRepository.findById(product.getId());
 
-    if (productId != null) {
-      returnProduct = this.productRepository.findById(productId);
+    if (returnProduct.isPresent()) {
+      product = this.productRepository.save(product);
 
-      if (returnProduct.isPresent()) {
-        this.productRepository.save(product);
-      }
+      returnProduct = Optional.of(product);
     }
 
     return returnProduct;

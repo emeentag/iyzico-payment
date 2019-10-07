@@ -22,12 +22,13 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * ProductService
+ * ProductServiceIntegrationTest
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -36,7 +37,7 @@ public class ProductServiceIntegrationTest {
 
   @Autowired
   private ProductService productService;
-  
+
   @Autowired
   public ProductRepository productRepository;
 
@@ -54,7 +55,6 @@ public class ProductServiceIntegrationTest {
     member = new Member(null, "Test Member", "test@test.com", new HashSet<>());
     basket = new Basket(null, member, new HashSet<>(), BasketStatus.NOT_PAYED);
     product = new Product(null, "Test Product", "Test details", new BigDecimal("20"), 10L, new HashSet<>());
-    product = new Product(null, "Test Product", "Test details", new BigDecimal("20"), 10L, new HashSet<>());
 
     member.getBaskets().add(basket);
     basket.getProducts().add(product);
@@ -71,7 +71,7 @@ public class ProductServiceIntegrationTest {
     Optional<Product> expectedProduct = this.productService.addProduct(p);
     Optional<Product> productInDB = this.productRepository.findById(2L);
 
-    //then
+    // then
     assertThat(expectedProduct.get().getId()).isEqualTo(productInDB.get().getId());
     assertThat(expectedProduct.get().getName()).isEqualTo(productInDB.get().getName());
     assertThat(expectedProduct.get().getPrice()).isEqualTo(productInDB.get().getPrice());
@@ -82,7 +82,7 @@ public class ProductServiceIntegrationTest {
     // when
     Optional<Product> expectedProduct = this.productService.addProduct(product);
 
-    //then
+    // then
     assertThat(expectedProduct).isEmpty();
   }
 
@@ -91,7 +91,7 @@ public class ProductServiceIntegrationTest {
     // when
     Optional<Product> expectedProduct = this.productService.getProduct(product.getId());
 
-    //then
+    // then
     assertThat(expectedProduct.get().getId()).isEqualTo(product.getId());
   }
 
@@ -108,14 +108,61 @@ public class ProductServiceIntegrationTest {
     // when
     List<Product> expectedProducts = this.productService.getProducts(0);
 
-    //then
+    // then
     assertThat(expectedProducts.size()).isEqualTo(2);
 
     // when
     expectedProducts = this.productService.getProducts(1);
 
-    //then
+    // then
     assertThat(expectedProducts.size()).isEqualTo(1);
   }
-  
+
+  @Test
+  public void updateProduct_should_update_product() {
+    // given
+    product.setName("Updated name");
+
+    // when
+    Optional<Product> expectedProduct = this.productService.updateProduct(product);
+
+    // then
+    assertThat(expectedProduct.get().getName()).isEqualTo(product.getName());
+  }
+
+  @Test(expected = InvalidDataAccessApiUsageException.class)
+  public void updateProduct_should_not_update_product_if_not_exist() {
+    // given
+    Product p1 = new Product(null, "Test Product", "Test details", new BigDecimal("10"), 10L, new HashSet<>());
+
+    // when
+    Optional<Product> expectedProduct = this.productService.updateProduct(p1);
+  }
+
+  @Test
+  public void deleteProduct_should_delete_product() {
+    // given
+    this.productService.productRepository = Mockito.mock(ProductRepository.class);
+    Mockito.when(this.productService.productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+
+    // when
+    this.productService.deleteProduct(product.getId());
+
+    // then
+    Mockito.verify(this.productService.productRepository, Mockito.atLeast(1)).delete(product);
+  }
+
+  @Test
+  public void deleteProduct_should_not_delete_product_if_not_exist() {
+    // given
+    this.productService.productRepository = Mockito.mock(ProductRepository.class);
+    Mockito.when(this.productService.productRepository.findById(product.getId())).thenReturn(Optional.empty());
+
+    // when
+    this.productService.deleteProduct(product.getId());
+
+    // then
+    Mockito.verify(this.productService.productRepository, Mockito.never()).delete(product);
+  }
+
 }

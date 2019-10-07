@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.iyzico.challenge.configuration.ApplicationConfiguration;
 import com.iyzico.challenge.entity.Product;
 import com.iyzico.challenge.repository.ProductRepository;
 import com.iyzico.challenge.service.ProductService;
@@ -130,6 +131,9 @@ public class ProductServiceTest {
   @Test
   public void getProducts_should_return_products() throws Exception {
     // given
+    this.productService.applicationConfiguration = Mockito.mock(ApplicationConfiguration.class);
+    Mockito.when(this.productService.applicationConfiguration.getItemsInSinglePage()).thenReturn(10);
+
     Product product = productWithId;
     Page<Product> page = new PageImpl<>(Arrays.asList(product, product));
     Mockito.when(productRepository.findAll(PageRequest.of(0, 10))).thenReturn(page);
