@@ -8,6 +8,8 @@ import java.util.Optional;
 
 import com.iyzico.challenge.entity.Basket;
 import com.iyzico.challenge.entity.Basket.BasketStatus;
+import com.iyzico.challenge.middleware.exception.EntityNotAcceptableException;
+import com.iyzico.challenge.middleware.exception.PaymentFailedException;
 import com.iyzico.challenge.middleware.exception.ResourceNotFoundException;
 import com.iyzico.challenge.entity.Member;
 import com.iyzico.challenge.entity.Product;
@@ -292,8 +294,8 @@ public class BasketServiceTest {
     assertThat(expectedBasket).isEmpty();
   }
 
-  @Test
-  public void buyBasket_should_return_empty_if_basket_status_PAYED() {
+  @Test(expected = EntityNotAcceptableException.class)
+  public void buyBasket_should_thorow_exception_if_satatus_is_not_acceptable() {
     // given
     Long memberId = member.getId();
     Long basketId = basket.getId();
@@ -304,14 +306,13 @@ public class BasketServiceTest {
     Mockito.when(basketService.basketRepository.findByIdAndMemberId(basketId, memberId)).thenReturn(optionalBasket);
 
     // when
-    Optional<Basket> expectedBasket = this.basketService.buyBasket(basketId, memberId);
+    this.basketService.buyBasket(basketId, memberId);
 
-    // then
-    assertThat(expectedBasket).isEmpty();
+    // then throw exception
   }
 
-  @Test
-  public void buyBasket_should_return_empty_if_no_product_in_basket() {
+  @Test(expected = EntityNotAcceptableException.class)
+  public void buyBasket_should_thorow_exception_if_no_product_in_basket() {
     // given
     Long memberId = member.getId();
     Long basketId = basket.getId();
@@ -322,14 +323,13 @@ public class BasketServiceTest {
     basket.setProducts(new HashSet<Product>());
 
     // when
-    Optional<Basket> expectedBasket = this.basketService.buyBasket(basketId, memberId);
+    this.basketService.buyBasket(basketId, memberId);
 
-    // then
-    assertThat(expectedBasket).isEmpty();
+    // then throw exception
   }
 
-  @Test
-  public void buyBasket_should_return_empty_if_product_out_stock() {
+  @Test(expected = EntityNotAcceptableException.class)
+  public void buyBasket_should_thorow_exception_if_product_out_stock() {
     // given
     Long memberId = member.getId();
     Long basketId = basket.getId();
@@ -345,14 +345,13 @@ public class BasketServiceTest {
     basket.getProducts().add(consumedProduct);
 
     // when
-    Optional<Basket> expectedBasket = this.basketService.buyBasket(basketId, memberId);
+    this.basketService.buyBasket(basketId, memberId);
 
-    // then
-    assertThat(expectedBasket).isEmpty();
+    // then throw exception
   }
 
-  @Test
-  public void buyBasket_should_return_empty_if_payment_failed() {
+  @Test(expected = PaymentFailedException.class)
+  public void buyBasket_should_thorow_exception_if_payment_failed() {
     // given
     Long memberId = member.getId();
     Long basketId = basket.getId();
@@ -373,10 +372,9 @@ public class BasketServiceTest {
     Mockito.when(this.basketService.paymentService.pay(basket)).thenReturn(payment);
 
     // when
-    Optional<Basket> expectedBasket = this.basketService.buyBasket(basketId, memberId);
+    this.basketService.buyBasket(basketId, memberId);
 
-    // then
-    assertThat(expectedBasket).isEmpty();
+    // then throw exception
   }
 
   @Test

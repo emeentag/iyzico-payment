@@ -49,7 +49,7 @@ public class Basket extends Auditable {
   @JsonIgnore
   private Member member;
 
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   @JoinTable(name = "basket_product", joinColumns = {
       @JoinColumn(name = "basket_id", referencedColumnName = "id") }, inverseJoinColumns = {
           @JoinColumn(name = "product_id", referencedColumnName = "id") })

@@ -73,6 +73,8 @@ public class ProductService {
     basketItem.setName(product.getName());
     basketItem.setItemType(type.name());
     basketItem.setPrice(product.getPrice());
+    basketItem.setCategory1("Collectibles");
+    basketItem.setCategory2("Accessories");
 
     return basketItem;
   }

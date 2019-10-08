@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
@@ -42,6 +43,6 @@ public class Product extends Auditable {
   @Column(name = "stock_count", columnDefinition = "BIGINT", nullable = false)
   private Long stockCount;
 
-  @ManyToMany(mappedBy = "products", cascade = CascadeType.ALL)
+  @ManyToMany(mappedBy = "products", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private Set<Basket> baskets = new HashSet<>();
 }
