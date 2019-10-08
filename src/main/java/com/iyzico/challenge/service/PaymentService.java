@@ -38,7 +38,10 @@ public class PaymentService {
   @Autowired
   public ApplicationConfiguration applicationConfiguration;
 
-  public Payment pay(Basket basketEntity) {
+  public Payment pay(Basket basketEntity) throws Exception {
+
+    Payment payment = null;
+
     Options options = new Options();
     options.setApiKey(this.applicationConfiguration.getPaymentApiKey());
     options.setSecretKey(this.applicationConfiguration.getPaymentApiSecretKey());
@@ -91,6 +94,12 @@ public class PaymentService {
     billingAddress.setZipCode("34742");
     request.setBillingAddress(billingAddress);
 
-    return Payment.create(request, options);
+    try {
+      payment = Payment.create(request, options);
+    } catch (Exception e) {
+      throw new Exception("Payment failed by iyzico!");
+    }
+
+    return payment;
   }
 }

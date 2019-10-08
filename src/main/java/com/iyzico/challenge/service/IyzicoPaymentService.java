@@ -1,16 +1,16 @@
 package com.iyzico.challenge.service;
 
+import java.math.BigDecimal;
+
 import com.iyzico.challenge.entity.Payment;
+import com.iyzico.challenge.middleware.exception.PaymentFailedException;
 import com.iyzico.challenge.repository.PaymentRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
 
 @Service
-@Transactional
 public class IyzicoPaymentService {
 
     private Logger logger = LoggerFactory.getLogger(IyzicoPaymentService.class);
@@ -30,10 +30,14 @@ public class IyzicoPaymentService {
         BankPaymentResponse response = bankService.pay(request);
 
         //insert records
-        Payment payment = new Payment();
-        payment.setBankResponse(response.getResultCode());
-        payment.setPrice(price);
-        paymentRepository.save(payment);
-        logger.info("Payment saved successfully!");
+        if(response.getResultCode().equals("200")) {
+            Payment payment = new Payment();
+            payment.setBankResponse(response.getResultCode());
+            payment.setPrice(price);
+            paymentRepository.save(payment);
+            logger.info("Payment saved successfully!");
+        } else {
+            throw new PaymentFailedException("Payment request failed by bank!");
+        }
     }
 }
