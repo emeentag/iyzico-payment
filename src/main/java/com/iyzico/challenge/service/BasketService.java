@@ -7,6 +7,8 @@ import com.iyzico.challenge.entity.Basket;
 import com.iyzico.challenge.entity.Basket.BasketStatus;
 import com.iyzico.challenge.entity.Member;
 import com.iyzico.challenge.entity.Product;
+import com.iyzico.challenge.middleware.exception.EntityNotAcceptableException;
+import com.iyzico.challenge.middleware.exception.PaymentFailedException;
 import com.iyzico.challenge.middleware.exception.ResourceNotFoundException;
 import com.iyzico.challenge.repository.BasketRepository;
 import com.iyzico.challenge.repository.MemberRepository;
@@ -17,12 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * BasketService
  */
-@Slf4j
 @Service
 public class BasketService {
 
@@ -150,20 +149,16 @@ public class BasketService {
               basketEntity.setStatus(BasketStatus.PAYED);
               this.basketRepository.save(basketEntity);
             } else {
-              basket = Optional.empty();
-              log.info("Payment failed with error" + payment.getErrorCode() + ":" + payment.getErrorMessage());
+              throw new PaymentFailedException("Payment failed with error " + payment.getErrorCode() + ": " + payment.getErrorMessage());
             }
           } else {
-            basket = Optional.empty();
-            log.info("Product out of stock.");
+            throw new EntityNotAcceptableException("Product out of stock.");
           }
         } else {
-          basket = Optional.empty();
-          log.info("There is no product in basket.");
+          throw new EntityNotAcceptableException("There is no product in basket.");
         }
       } else {
-        basket = Optional.empty();
-        log.info("Basket status not valid.");
+        throw new EntityNotAcceptableException("Basket status is not acceptable.");
       }
     } else {
       throw new ResourceNotFoundException("Basket: " + basketId + " not found.");
