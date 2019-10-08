@@ -1,6 +1,6 @@
 package com.iyzico.challenge.service;
 
-import com.iyzico.challenge.validators.CardNumberValidator;
+import com.iyzico.challenge.validator.CardNumberValidator;
 
 import org.springframework.stereotype.Service;
 

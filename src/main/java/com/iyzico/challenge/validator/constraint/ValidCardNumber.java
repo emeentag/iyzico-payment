@@ -1,4 +1,4 @@
-package com.iyzico.challenge.validators.constraints;
+package com.iyzico.challenge.validator.constraint;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -9,14 +9,15 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import com.iyzico.challenge.validators.CardNumberValidator;
+import com.iyzico.challenge.validator.CardNumberValidator;
+
 
 /**
  * ValidCardNumber
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE,ElementType.TYPE_PARAMETER,ElementType.TYPE_USE})
+@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER })
 @Constraint(validatedBy = CardNumberValidator.class)
 public @interface ValidCardNumber {
 
@@ -24,5 +25,5 @@ public @interface ValidCardNumber {
 
   Class<?>[] groups() default {};
 
-  Class<? extends Payload>[] payload() default {}; 
+  Class<? extends Payload>[] payload() default {};
 }

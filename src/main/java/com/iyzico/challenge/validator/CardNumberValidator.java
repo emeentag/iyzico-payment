@@ -1,9 +1,9 @@
-package com.iyzico.challenge.validators;
+package com.iyzico.challenge.validator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.iyzico.challenge.validators.constraints.ValidCardNumber;
+import com.iyzico.challenge.validator.constraint.ValidCardNumber;
 
 /**
  * CardNumberValidator

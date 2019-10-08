@@ -1,8 +1,8 @@
-package com.iyzico.challenge.units;
+package com.iyzico.challenge.unit.validator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.iyzico.challenge.validators.CardNumberValidator;
+import com.iyzico.challenge.validator.CardNumberValidator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,18 +55,21 @@ public class CardNumberValidatorTest {
     String lessThan15NumFormattedCardNumber = "4729-150-0000-005";
     String malformedCardNumber = "47291500A0000005";
     String malformedFormattedCardNumber = "4729-1D00-0000-0005";
+    String malformedFormattedCardNumber2 = "4729/1500/0000/0005";
 
     // when
     boolean isValid1 = cardNumberValidator.isValid(lessThan15NumCardNumber, null);
     boolean isValid2 = cardNumberValidator.isValid(lessThan15NumFormattedCardNumber, null);
     boolean isValid3 = cardNumberValidator.isValid(malformedCardNumber, null);
     boolean isValid4 = cardNumberValidator.isValid(malformedFormattedCardNumber, null);
+    boolean isValid5 = cardNumberValidator.isValid(malformedFormattedCardNumber2, null);
 
     // then
     assertThat(isValid1).isFalse();
     assertThat(isValid2).isFalse();
     assertThat(isValid3).isFalse();
     assertThat(isValid4).isFalse();
+    assertThat(isValid5).isFalse();
   }
 
   @Test

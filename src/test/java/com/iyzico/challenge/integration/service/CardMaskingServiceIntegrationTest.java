@@ -1,4 +1,4 @@
-package com.iyzico.challenge.integrations.service;
+package com.iyzico.challenge.integration.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class CardMaskingServiceTest {
+public class CardMaskingServiceIntegrationTest {
 
     @Autowired
     private CardMaskingService cardMaskingService;
