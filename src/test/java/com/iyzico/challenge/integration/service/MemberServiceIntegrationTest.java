@@ -99,7 +99,7 @@ public class MemberServiceIntegrationTest {
     Member m1 = new Member(null, "Test Member", "test@test.com", new HashSet<>());
 
     // when
-    Optional<Member> expectedMember = this.memberService.updateMember(m1);
+   this.memberService.updateMember(m1);
   }
 
   @Test

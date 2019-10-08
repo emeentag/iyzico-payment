@@ -136,7 +136,7 @@ public class ProductServiceIntegrationTest {
     Product p1 = new Product(null, "Test Product", "Test details", new BigDecimal("10"), 10L, new HashSet<>());
 
     // when
-    Optional<Product> expectedProduct = this.productService.updateProduct(p1);
+    this.productService.updateProduct(p1);
   }
 
   @Test
