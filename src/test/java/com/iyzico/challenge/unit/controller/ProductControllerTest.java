@@ -6,11 +6,8 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Optional;
 
-import com.iyzico.challenge.controller.MemberController;
 import com.iyzico.challenge.controller.ProductController;
-import com.iyzico.challenge.entity.Member;
 import com.iyzico.challenge.entity.Product;
-import com.iyzico.challenge.service.MemberService;
 import com.iyzico.challenge.service.ProductService;
 
 import org.junit.Before;
@@ -61,7 +58,7 @@ public class ProductControllerTest {
   }
 
   @Test
-  public void getMember_should_return_NOT_FOUND() throws Exception {
+  public void getProduct_should_return_NOT_FOUND() throws Exception {
     // given
     Product product = productWithId;
     Mockito.when(this.productService.getProduct(product.getId())).thenReturn(Optional.empty());
