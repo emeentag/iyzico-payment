@@ -351,7 +351,7 @@ public class BasketServiceTest {
   }
 
   @Test(expected = PaymentFailedException.class)
-  public void buyBasket_should_thorow_exception_if_payment_failed() {
+  public void buyBasket_should_thorow_exception_if_payment_failed() throws Exception {
     // given
     Long memberId = member.getId();
     Long basketId = basket.getId();
@@ -377,8 +377,35 @@ public class BasketServiceTest {
     // then throw exception
   }
 
+  @Test(expected = PaymentFailedException.class)
+  public void buyBasket_should_thorow_exception_if_payment_failed_by_iyzico() throws Exception {
+    // given
+    Long memberId = member.getId();
+    Long basketId = basket.getId();
+
+    Mockito.when(basketService.memberRepository.existsById(memberId)).thenReturn(true);
+    Mockito.when(basketService.basketRepository.findByIdAndMemberId(basketId, memberId)).thenReturn(optionalBasket);
+    Optional<Product> optionalProduct = Optional
+        .of(new Product(1L, "Test product", "details", new BigDecimal("20"), 20L, null));
+
+    Product consumedProduct = optionalProduct.get();
+    consumedProduct.setStockCount(2L);
+
+    basket.getProducts().add(consumedProduct);
+
+    Payment payment = new Payment();
+    payment.setStatus("success");
+
+    Mockito.when(this.basketService.paymentService.pay(basket)).thenThrow(new Exception());
+
+    // when
+    this.basketService.buyBasket(basketId, memberId);
+
+    // then throw exception
+  }
+
   @Test
-  public void buyBasket_should_update_stock_count_and_set_status_PAYED() {
+  public void buyBasket_should_update_stock_count_and_set_status_PAYED() throws Exception {
     // given
     Long memberId = member.getId();
     Long basketId = basket.getId();

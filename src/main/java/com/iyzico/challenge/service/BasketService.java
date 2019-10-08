@@ -17,7 +17,6 @@ import com.iyzipay.model.Payment;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * BasketService
@@ -46,7 +45,7 @@ public class BasketService {
   public Optional<Basket> getBasket(Long basketId, Long memberId) {
     boolean isMemberExist = this.memberRepository.existsById(memberId);
 
-    if(!isMemberExist) {
+    if (!isMemberExist) {
       throw new ResourceNotFoundException("Member: " + memberId + " not found.");
     }
 
@@ -116,12 +115,11 @@ public class BasketService {
     return basket;
   }
 
-  @Transactional(rollbackFor = Exception.class)
   public Optional<Basket> buyBasket(Long basketId, Long memberId) {
 
     boolean isMemberExist = this.memberRepository.existsById(memberId);
 
-    if(!isMemberExist) {
+    if (!isMemberExist) {
       throw new ResourceNotFoundException("Member: " + memberId + " not found.");
     }
 
@@ -137,19 +135,24 @@ public class BasketService {
         if (products.size() > 0) {
           if (inStock(products)) {
 
-            // Purchase
-            Payment payment = this.paymentService.pay(basketEntity);
+            try {
+              // Purchase
+              Payment payment = this.paymentService.pay(basketEntity);
 
-            if (payment.getStatus().equalsIgnoreCase("success")) {
+              if (payment.getStatus().equalsIgnoreCase("success")) {
 
-              // Update stock count.
-              updateStock(products);
+                // Update stock count.
+                updateStock(products);
 
-              // Close the basket.
-              basketEntity.setStatus(BasketStatus.PAYED);
-              this.basketRepository.save(basketEntity);
-            } else {
-              throw new PaymentFailedException("Payment failed with error " + payment.getErrorCode() + ": " + payment.getErrorMessage());
+                // Close the basket.
+                basketEntity.setStatus(BasketStatus.PAYED);
+                this.basketRepository.save(basketEntity);
+              } else {
+                throw new PaymentFailedException(
+                    "Payment failed with error " + payment.getErrorCode() + ": " + payment.getErrorMessage());
+              }
+            } catch (Exception e) {
+              throw new PaymentFailedException(e.getMessage());
             }
           } else {
             throw new EntityNotAcceptableException("Product out of stock.");
