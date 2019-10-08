@@ -2,13 +2,16 @@ package com.iyzico.challenge.integration.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Optional;
 
 import com.iyzico.challenge.configuration.ApplicationConfiguration;
 import com.iyzico.challenge.entity.Basket;
 import com.iyzico.challenge.entity.Basket.BasketStatus;
+import com.iyzico.challenge.middleware.exception.ResourceNotFoundException;
 import com.iyzico.challenge.entity.Member;
+import com.iyzico.challenge.entity.Product;
 import com.iyzico.challenge.repository.BasketRepository;
 import com.iyzico.challenge.repository.MemberRepository;
 import com.iyzico.challenge.repository.ProductRepository;
@@ -65,37 +68,84 @@ public class BasketServiceIntegrationTest {
 
   @Before
   public void setUp() {
-    member = new Member(null, "Test Member", "test@test.com", new HashSet<>());
-    this.memberRepository.save(member);
-    
-    basket = new Basket(null, null, null, BasketStatus.NOT_PAYED);
-    this.basketRepository.save(basket);
+    member = new Member(null, "Test Member", "test@test.com");
+    this.memberRepository.saveAndFlush(member);
+
+    basket = new Basket(null, member, null, BasketStatus.NOT_PAYED);
+    this.basketRepository.saveAndFlush(basket);
+  }
+
+  @Test(expected = ResourceNotFoundException.class)
+  public void getBasket_should_thorow_exception_if_no_member() {
+    // when
+    this.basketService.getBasket(1L, 100L);
+
+    // then throw exception
+  }
+
+  @Test(expected = ResourceNotFoundException.class)
+  public void getBasket_should_thorow_exception_if_no_basket() {
+    // when
+    this.basketService.getBasket(100L, 1L);
+
+    // then throw exception
   }
 
   @Test
   public void getBasket_should_return_basket() {
-    // given
-    this.member.getBaskets().add(basket);
-    // this.basket.setMember(member);
-
-    this.memberRepository.save(member);
-
     // when
-    Optional<Basket> expectedBasket = this.basketService.getBasket(1L, 1L);
+    Optional<Basket> b =this.basketService.getBasket(1L, 1L);
 
     // then
-    assertThat(expectedBasket).isEmpty();
+    assertThat(b.get().getId()).isEqualTo(basket.getId());
   }
 
-  // @Test
-  // public void getBasket_should_return_empty_if_no_basket() {
-  //   // given
-  //   Basket b1 = new Basket(null, member, new HashSet<>(), BasketStatus.NOT_PAYED);
+  @Test(expected = ResourceNotFoundException.class)
+  public void createBasket_should_thorow_exception_if_no_member() {
+    // when
+    this.basketService.createBasket(100L);
 
-  //   // when
-  //   Optional<Basket> expectedBasket = this.basketService.getBasket(b1.getId(), member.getId());
+    // then throw exception
+  }
 
-  //   // then
-  //   assertThat(expectedBasket).isEmpty();
-  // }
+  @Test
+  public void createBasket_should_create_a_basket_for_member() {
+    // when
+    Optional<Basket> b = this.basketService.createBasket(1L);
+
+    // then throw exception
+    assertThat(b.get().getMember().getEmail()).isEqualTo(member.getEmail());
+  }
+
+  @Test(expected = ResourceNotFoundException.class)
+  public void addProductToBasket_should_thorow_exception_if_no_basket() {
+    // when
+    this.basketService.addProductToBasket(100L, 1L);
+
+    // then throw exception
+  }
+
+  @Test(expected = ResourceNotFoundException.class)
+  public void addProductToBasket_should_thorow_exception_if_no_product() {
+    // when
+    this.basketService.addProductToBasket(1L, 100L);
+
+    // then throw exception
+  }
+
+  @Test
+  public void addProductToBasket_should_add_a_ptoduct_for_basket() {
+    // given
+    Product p = new Product();
+    p.setName("Test product");
+    p.setPrice(new BigDecimal("10"));
+    p.setStockCount(10L);
+    this.productRepository.save(p);
+
+    // when
+    Optional<Basket> b = this.basketService.addProductToBasket(1L, 1L);
+
+    // then throw exception
+    assertThat(p.getBaskets().size()).isEqualTo(1);
+  }
 }

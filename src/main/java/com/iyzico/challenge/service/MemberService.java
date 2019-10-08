@@ -3,6 +3,7 @@ package com.iyzico.challenge.service;
 import java.util.Optional;
 
 import com.iyzico.challenge.entity.Member;
+import com.iyzico.challenge.middleware.exception.ResourceNotFoundException;
 import com.iyzico.challenge.repository.MemberRepository;
 import com.iyzipay.model.Buyer;
 
@@ -18,45 +19,38 @@ public class MemberService {
   @Autowired
   public MemberRepository memberRepository;
 
-  public Optional<Member> addMember(Member member) {
-    Optional<Member> returnMember = Optional.empty();
-
-    if (member.getId() == null) {
-      returnMember = Optional.of(this.memberRepository.save(member));
-    }
-
-    return returnMember;
+  public Member addMember(Member member) {
+    return this.memberRepository.save(member);
   }
 
   public Optional<Member> getMember(Long memberId) {
 
-    Optional<Member> returnMember = this.memberRepository.findById(memberId);
+    Optional<Member> memberInDB = this.memberRepository.findById(memberId);
 
-    return returnMember;
+    return memberInDB;
   }
 
   public Optional<Member> updateMember(Member member) {
+    final Long memberId = member.getId();
 
-    Optional<Member> returnMember = this.memberRepository.findById(member.getId());
+    Optional<Member> memberInDB = this.memberRepository.findById(member.getId());
 
-    if (returnMember.isPresent()) {
-      member = this.memberRepository.save(member);
+    memberInDB = memberInDB.map(m -> Optional.of(this.memberRepository.save(member)))
+        .orElseThrow(() -> new ResourceNotFoundException("Member: " + memberId + " not found."));
 
-      returnMember = Optional.of(member);
-    }
-
-    return returnMember;
+    return memberInDB;
   }
 
   public Optional<Member> deleteMember(Long memberId) {
 
-    Optional<Member> returnMember = this.memberRepository.findById(memberId);
+    Optional<Member> memberInDB = this.memberRepository.findById(memberId);
 
-    if (returnMember.isPresent()) {
-      this.memberRepository.delete(returnMember.get());
-    }
+    memberInDB = memberInDB.map(m -> {
+      this.memberRepository.delete(m);
+      return Optional.of(m);
+    }).orElseThrow(() -> new ResourceNotFoundException("Member: " + memberId + " not found."));
 
-    return returnMember;
+    return memberInDB;
   }
 
   public Buyer toBuyer(Member member) {

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Optional;
 
 import com.iyzico.challenge.entity.Member;
+import com.iyzico.challenge.middleware.exception.ResourceNotFoundException;
 import com.iyzico.challenge.repository.MemberRepository;
 import com.iyzico.challenge.service.MemberService;
 import com.iyzipay.model.Buyer;
@@ -37,20 +38,8 @@ public class MemberServiceTest {
   public void setUp() {
     memberService = new MemberService();
     memberService.memberRepository = memberRepository;
-    memberWithId = new Member(1L, "Test Member", "test@test.com", null);
-    memberWithoutId = new Member(null, "Test Member", "test@test.com", null);
-  }
-
-  @Test
-  public void addMember_should_return_empty_when_has_id() {
-    // given
-    Member member = memberWithId;
-
-    // when
-    Optional<Member> returnMember = memberService.addMember(member);
-
-    // then
-    assertThat(returnMember).isEmpty();
+    memberWithId = new Member(1L, "Test Member", "test@test.com");
+    memberWithoutId = new Member(null, "Test Member", "test@test.com");
   }
 
   @Test
@@ -60,68 +49,57 @@ public class MemberServiceTest {
     Mockito.when(memberRepository.save(member)).thenReturn(member);
 
     // when
-    Optional<Member> returnMember = memberService.addMember(member);
+    Member memberInDB = this.memberService.addMember(member);
 
     // then
-    assertThat(returnMember).isEqualTo(Optional.of(member));
+    assertThat(memberInDB).isEqualTo(member);
   }
 
   @Test
-  public void updateMember_should_return_empty_when_has_not_id() throws Exception {
-    // given
-    Member member = memberWithoutId;
-
-    // when
-    Optional<Member> returnMember = memberService.updateMember(member);
-
-    // then
-    assertThat(returnMember).isEmpty();
-  }
-
-  @Test
-  public void updatemember_should_return_member_when_has_id() throws Exception {
+  public void updateMember_should_return_member_when_has_id() throws Exception {
     // given
     Member member = memberWithId;
-    Optional<Member> returnMember = Optional.of(member);
-    Mockito.when(memberRepository.save(member)).thenReturn(member);
-    Mockito.when(memberRepository.findById(member.getId())).thenReturn(returnMember);
+    member.setEmail("updated@test.com");
+    Member memberInDB = new Member(1L, "Test Member", "test@test.com");
+    Optional<Member> returnMember = Optional.of(memberInDB);
+    Mockito.when(this.memberRepository.save(member)).thenReturn(member);
+    Mockito.when(this.memberRepository.findById(member.getId())).thenReturn(returnMember);
 
     // when
-    returnMember = memberService.updateMember(member);
+    returnMember = this.memberService.updateMember(member);
 
     // then
-    assertThat(returnMember).isEqualTo(Optional.of(member));
+    assertThat(returnMember.get().getEmail()).isEqualTo(member.getEmail());
   }
 
-  @Test
-  public void updateMember_should_return_empty_when_is_not_present() throws Exception {
+  @Test(expected = ResourceNotFoundException.class)
+  public void updateMember_should_throw_exception_when_not_found_on_db() throws Exception {
     // given
     Member member = memberWithId;
     Optional<Member> returnMember = Optional.empty();
     Mockito.when(memberRepository.findById(member.getId())).thenReturn(returnMember);
 
     // when
-    returnMember = memberService.updateMember(member);
+    returnMember = this.memberService.updateMember(member);
 
-    // then
-    assertThat(returnMember).isEmpty();
+    // then throw exception
   }
 
   @Test
   public void getMember_should_return_member() throws Exception {
     // given
     Member member = memberWithId;
-    Mockito.when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+    Mockito.when(this.memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
     // when
-    Optional<Member> returnMember = memberService.getMember(member.getId());
+    Optional<Member> returnMember = this.memberService.getMember(member.getId());
 
     // then
     assertThat(returnMember).isEqualTo(Optional.of(member));
   }
 
   @Test
-  public void deleteMember_should_return_member_when_there_is_sth_do_delete() throws Exception {
+  public void deleteMember_should_return_member_when_there_is_sth_to_delete() throws Exception {
     // given
     Member member = memberWithId;
     Mockito.when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
@@ -133,17 +111,16 @@ public class MemberServiceTest {
     assertThat(returnMember).isEqualTo(returnMember);
   }
 
-  @Test
-  public void deleteMember_should_return_empty_when_there_is_sth_do_delete() throws Exception {
+  @Test(expected = ResourceNotFoundException.class)
+  public void deleteMember_should_throw_exception_when_there_is_nothing_delete() throws Exception {
     // given
     Member member = memberWithId;
-    Mockito.when(memberRepository.findById(member.getId())).thenReturn(Optional.empty());
+    Mockito.when(this.memberRepository.findById(member.getId())).thenReturn(Optional.empty());
 
     // when
-    Optional<Member> returnMember = memberService.deleteMember(member.getId());
+    this.memberService.deleteMember(member.getId());
 
-    // then
-    assertThat(returnMember).isEmpty();
+    // then throw exception
   }
 
   @Test

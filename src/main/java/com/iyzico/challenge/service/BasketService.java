@@ -7,6 +7,7 @@ import com.iyzico.challenge.entity.Basket;
 import com.iyzico.challenge.entity.Basket.BasketStatus;
 import com.iyzico.challenge.entity.Member;
 import com.iyzico.challenge.entity.Product;
+import com.iyzico.challenge.middleware.exception.ResourceNotFoundException;
 import com.iyzico.challenge.repository.BasketRepository;
 import com.iyzico.challenge.repository.MemberRepository;
 import com.iyzico.challenge.repository.ProductRepository;
@@ -44,33 +45,32 @@ public class BasketService {
   public PaymentService paymentService;
 
   public Optional<Basket> getBasket(Long basketId, Long memberId) {
-    Optional<Member> member = this.memberRepository.findById(memberId);
-    Optional<Basket> basket = this.basketRepository.findByIdAndMember(basketId, member.get());
+    boolean isMemberExist = this.memberRepository.existsById(memberId);
+
+    if(!isMemberExist) {
+      throw new ResourceNotFoundException("Member: " + memberId + " not found.");
+    }
+
+    Optional<Basket> basket = this.basketRepository.findByIdAndMemberId(basketId, memberId);
 
     if (!basket.isPresent()) {
-      return Optional.empty();
-    } else {
-      log.info("Basket not found!");
+      throw new ResourceNotFoundException("Basket: " + basketId + " not found.");
     }
 
     return basket;
   }
 
-  public Optional<Basket> addBasket(Long memberId) {
+  public Optional<Basket> createBasket(Long memberId) {
     Optional<Basket> basket = Optional.empty();
     Optional<Member> member = this.memberRepository.findById(memberId);
 
-    if (member.isPresent()) {
-      Member memberEntity = member.get();
-
+    basket = member.map(m -> {
       Basket basketEntity = new Basket();
-      basketEntity.setMember(memberEntity);
+      basketEntity.setMember(m);
       this.basketRepository.save(basketEntity);
 
-      basket = Optional.of(basketEntity);
-    } else {
-      log.info("There is no member with this id!");
-    }
+      return Optional.of(basketEntity);
+    }).orElseThrow(() -> new ResourceNotFoundException("Member: " + memberId + " not found."));
 
     return basket;
   }
@@ -87,10 +87,10 @@ public class BasketService {
         basketEntity.getProducts().add(product.get());
         this.basketRepository.save(basketEntity);
       } else {
-        log.info("There is no product with this id!");
+        throw new ResourceNotFoundException("Product: " + productId + "not");
       }
     } else {
-      log.info("There is no basket with this id!");
+      throw new ResourceNotFoundException("Basket: " + basketId + " not found.");
     }
 
     return basket;
@@ -108,10 +108,10 @@ public class BasketService {
         basketEntity.getProducts().remove(product.get());
         this.basketRepository.save(basketEntity);
       } else {
-        log.info("There is no product with this id!");
+        throw new ResourceNotFoundException("Product: " + productId + "not");
       }
     } else {
-      log.info("There is no basket with this id!");
+      throw new ResourceNotFoundException("Basket: " + basketId + " not found.");
     }
 
     return basket;
@@ -120,8 +120,13 @@ public class BasketService {
   @Transactional(rollbackFor = Exception.class)
   public Optional<Basket> buyBasket(Long basketId, Long memberId) {
 
-    Optional<Member> member = this.memberRepository.findById(memberId);
-    Optional<Basket> basket = this.basketRepository.findByIdAndMember(basketId, member.get());
+    boolean isMemberExist = this.memberRepository.existsById(memberId);
+
+    if(!isMemberExist) {
+      throw new ResourceNotFoundException("Member: " + memberId + " not found.");
+    }
+
+    Optional<Basket> basket = this.basketRepository.findByIdAndMemberId(basketId, memberId);
 
     if (basket.isPresent()) {
 
@@ -161,7 +166,7 @@ public class BasketService {
         log.info("Basket status not valid.");
       }
     } else {
-      log.info("Basket not found!");
+      throw new ResourceNotFoundException("Basket: " + basketId + " not found.");
     }
 
     return basket;

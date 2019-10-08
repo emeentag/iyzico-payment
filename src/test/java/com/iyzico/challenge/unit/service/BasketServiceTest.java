@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import com.iyzico.challenge.entity.Basket;
 import com.iyzico.challenge.entity.Basket.BasketStatus;
+import com.iyzico.challenge.middleware.exception.ResourceNotFoundException;
 import com.iyzico.challenge.entity.Member;
 import com.iyzico.challenge.entity.Product;
 import com.iyzico.challenge.repository.BasketRepository;
@@ -73,7 +74,7 @@ public class BasketServiceTest {
     basketService.memberService = this.memberService;
     basketService.paymentService = this.paymentService;
 
-    member = new Member(1L, "Test", "test@test.com", null);
+    member = new Member(1L, "Test", "test@test.com");
     basket = new Basket(1L, member, new HashSet<Product>(), BasketStatus.NOT_PAYED);
 
     optionalMember = Optional.of(member);
@@ -85,8 +86,8 @@ public class BasketServiceTest {
     // given
     Long memberId = member.getId();
     Long basketId = basket.getId();
-    Mockito.when(basketService.memberRepository.findById(memberId)).thenReturn(optionalMember);
-    Mockito.when(basketService.basketRepository.findByIdAndMember(basketId, member)).thenReturn(optionalBasket);
+    Mockito.when(basketService.memberRepository.existsById(memberId)).thenReturn(true);
+    Mockito.when(basketService.basketRepository.findByIdAndMemberId(basketId, memberId)).thenReturn(optionalBasket);
 
     // when
     Optional<Basket> expectedBasket = this.basketService.getBasket(basketId, memberId);
@@ -95,45 +96,56 @@ public class BasketServiceTest {
     assertThat(expectedBasket.get()).isEqualTo(basket);
   }
 
-  @Test
-  public void getBasket_should_return_empty_if_not_exist_in_db() {
+  @Test(expected = ResourceNotFoundException.class)
+  public void getBasket_should_throw_exception_if_member_not_exist() {
     // given
     Long memberId = member.getId();
     Long basketId = basket.getId();
-    Mockito.when(basketService.memberRepository.findById(memberId)).thenReturn(optionalMember);
-    Mockito.when(basketService.basketRepository.findByIdAndMember(basketId, member)).thenReturn(Optional.empty());
+    Mockito.when(basketService.memberRepository.existsById(memberId)).thenReturn(false);
 
     // when
-    Optional<Basket> expectedBasket = this.basketService.getBasket(basketId, memberId);
+    this.basketService.getBasket(basketId, memberId);
 
-    // then
-    assertThat(expectedBasket).isEmpty();
+    // then throw exception
+  }
+
+  @Test(expected = ResourceNotFoundException.class)
+  public void getBasket_should_throw_exception_if_basket_not_exist() {
+    // given
+    Long memberId = member.getId();
+    Long basketId = basket.getId();
+    Mockito.when(basketService.memberRepository.existsById(memberId)).thenReturn(true);
+    Mockito.when(basketService.basketRepository.findByIdAndMemberId(basketId, memberId)).thenReturn(Optional.empty());
+
+    // when
+    this.basketService.getBasket(basketId, memberId);
+
+    // then throw exception
   }
 
   @Test
-  public void addBasket_should_return_basket_if_member_has_not_got() {
+  public void createBasket_should_return_basket_if_member_has_not_got() {
     // given
     Long memberId = member.getId();
     Mockito.when(basketService.memberRepository.findById(memberId)).thenReturn(optionalMember);
 
     // when
-    Optional<Basket> expectedBasket = this.basketService.addBasket(memberId);
+    Optional<Basket> expectedBasket = this.basketService.createBasket(memberId);
 
     // then
     assertThat(expectedBasket.get().getMember()).isEqualTo(basket.getMember());
   }
 
-  @Test
-  public void addBasket_should_return_empty_if_no_member_exist() {
+  @Test(expected = ResourceNotFoundException.class)
+  public void createBasket_should_throw_exception_if_no_member_exist() {
     // given
     Long memberId = member.getId();
     Mockito.when(basketService.memberRepository.findById(memberId)).thenReturn(Optional.empty());
 
     // when
-    Optional<Basket> expectedBasket = this.basketService.addBasket(memberId);
+    this.basketService.createBasket(memberId);
 
-    // then
-    assertThat(expectedBasket).isEmpty();
+    // then throw exception
   }
 
   @Test
@@ -156,8 +168,8 @@ public class BasketServiceTest {
     assertThat(expectedBasket.get().getProducts().toArray()[0]).isEqualTo(optionalProduct.get());
   }
 
-  @Test
-  public void addProductToBasket_should_not_add_product_to_basket_if_no_basket() {
+  @Test(expected = ResourceNotFoundException.class)
+  public void addProductToBasket_should_throw_exception_if_no_basket() {
     // given
     Long basketId = basket.getId();
 
@@ -169,14 +181,13 @@ public class BasketServiceTest {
     Mockito.when(basketService.basketRepository.findById(basketId)).thenReturn(Optional.empty());
 
     // when
-    Optional<Basket> expectedBasket = this.basketService.addProductToBasket(basketId, productId);
+    this.basketService.addProductToBasket(basketId, productId);
 
-    // then
-    assertThat(expectedBasket).isEmpty();
+    // then throw exception
   }
 
-  @Test
-  public void addProductToBasket_should_not_add_product_to_basket_if_no_product() {
+  @Test(expected = ResourceNotFoundException.class)
+  public void addProductToBasket_should_throw_exception_if_no_product() {
     // given
     Long basketId = basket.getId();
 
@@ -188,10 +199,9 @@ public class BasketServiceTest {
     Mockito.when(basketService.basketRepository.findById(basketId)).thenReturn(optionalBasket);
 
     // when
-    Optional<Basket> expectedBasket = this.basketService.addProductToBasket(basketId, productId);
+    this.basketService.addProductToBasket(basketId, productId);
 
-    // then
-    assertThat(expectedBasket.get().getProducts()).isEmpty();
+    // then throw exception
   }
 
   @Test
@@ -215,8 +225,8 @@ public class BasketServiceTest {
     assertThat(expectedBasket.get().getProducts().size()).isEqualTo(0);
   }
 
-  @Test
-  public void deleteProductFromBasket_should_not_delete_product_from_basket_if_no_basket() {
+  @Test(expected = ResourceNotFoundException.class)
+  public void deleteProductFromBasket_should_throw_exception_if_no_basket() {
     // given
     Long basketId = basket.getId();
 
@@ -228,13 +238,12 @@ public class BasketServiceTest {
     Mockito.when(basketService.basketRepository.findById(basketId)).thenReturn(Optional.empty());
 
     // when
-    Optional<Basket> expectedBasket = this.basketService.deleteProductFromBasket(basketId, productId);
+    this.basketService.deleteProductFromBasket(basketId, productId);
 
-    // then
-    assertThat(expectedBasket).isEmpty();
+    // then throw exception
   }
 
-  @Test
+  @Test(expected = ResourceNotFoundException.class)
   public void deleteProductFromBasket_should_not_delete_product_from_basket_if_no_product() {
     // given
     Long basketId = basket.getId();
@@ -247,20 +256,34 @@ public class BasketServiceTest {
     Mockito.when(basketService.basketRepository.findById(basketId)).thenReturn(optionalBasket);
 
     // when
-    Optional<Basket> expectedBasket = this.basketService.deleteProductFromBasket(basketId, productId);
+    this.basketService.deleteProductFromBasket(basketId, productId);
 
-    // then
-    assertThat(expectedBasket.get().getProducts()).isEmpty();
+    // then throw exception
   }
 
-  @Test
-  public void buyBasket_should_return_empty_if_no_basket_exist() {
+  @Test(expected = ResourceNotFoundException.class)
+  public void buyBasket_should_throw_exception_if_no_member_exist() {
     // given
     Long memberId = member.getId();
     Long basketId = basket.getId();
 
-    Mockito.when(basketService.memberRepository.findById(memberId)).thenReturn(optionalMember);
-    Mockito.when(basketService.basketRepository.findByIdAndMember(basketId, member)).thenReturn(Optional.empty());
+    Mockito.when(basketService.memberRepository.existsById(memberId)).thenReturn(false);
+
+    // when
+    Optional<Basket> expectedBasket = this.basketService.buyBasket(basketId, memberId);
+
+    // then
+    assertThat(expectedBasket).isEmpty();
+  }
+
+  @Test(expected = ResourceNotFoundException.class)
+  public void buyBasket_should_throw_exception_if_no_basket_exist() {
+    // given
+    Long memberId = member.getId();
+    Long basketId = basket.getId();
+
+    Mockito.when(basketService.memberRepository.existsById(memberId)).thenReturn(true);
+    Mockito.when(basketService.basketRepository.findByIdAndMemberId(basketId, memberId)).thenReturn(Optional.empty());
 
     // when
     Optional<Basket> expectedBasket = this.basketService.buyBasket(basketId, memberId);
@@ -277,8 +300,8 @@ public class BasketServiceTest {
 
     basket.setStatus(BasketStatus.PAYED);
 
-    Mockito.when(basketService.memberRepository.findById(memberId)).thenReturn(optionalMember);
-    Mockito.when(basketService.basketRepository.findByIdAndMember(basketId, member)).thenReturn(optionalBasket);
+    Mockito.when(basketService.memberRepository.existsById(memberId)).thenReturn(true);
+    Mockito.when(basketService.basketRepository.findByIdAndMemberId(basketId, memberId)).thenReturn(optionalBasket);
 
     // when
     Optional<Basket> expectedBasket = this.basketService.buyBasket(basketId, memberId);
@@ -293,8 +316,8 @@ public class BasketServiceTest {
     Long memberId = member.getId();
     Long basketId = basket.getId();
 
-    Mockito.when(basketService.memberRepository.findById(memberId)).thenReturn(optionalMember);
-    Mockito.when(basketService.basketRepository.findByIdAndMember(basketId, member)).thenReturn(optionalBasket);
+    Mockito.when(basketService.memberRepository.existsById(memberId)).thenReturn(true);
+    Mockito.when(basketService.basketRepository.findByIdAndMemberId(basketId, memberId)).thenReturn(optionalBasket);
 
     basket.setProducts(new HashSet<Product>());
 
@@ -311,8 +334,8 @@ public class BasketServiceTest {
     Long memberId = member.getId();
     Long basketId = basket.getId();
 
-    Mockito.when(basketService.memberRepository.findById(memberId)).thenReturn(optionalMember);
-    Mockito.when(basketService.basketRepository.findByIdAndMember(basketId, member)).thenReturn(optionalBasket);
+    Mockito.when(basketService.memberRepository.existsById(memberId)).thenReturn(true);
+    Mockito.when(basketService.basketRepository.findByIdAndMemberId(basketId, memberId)).thenReturn(optionalBasket);
     Optional<Product> optionalProduct = Optional
         .of(new Product(1L, "Test product", "details", new BigDecimal("20"), 20L, null));
 
@@ -334,8 +357,8 @@ public class BasketServiceTest {
     Long memberId = member.getId();
     Long basketId = basket.getId();
 
-    Mockito.when(basketService.memberRepository.findById(memberId)).thenReturn(optionalMember);
-    Mockito.when(basketService.basketRepository.findByIdAndMember(basketId, member)).thenReturn(optionalBasket);
+    Mockito.when(basketService.memberRepository.existsById(memberId)).thenReturn(true);
+    Mockito.when(basketService.basketRepository.findByIdAndMemberId(basketId, memberId)).thenReturn(optionalBasket);
     Optional<Product> optionalProduct = Optional
         .of(new Product(1L, "Test product", "details", new BigDecimal("20"), 20L, null));
 
@@ -362,8 +385,8 @@ public class BasketServiceTest {
     Long memberId = member.getId();
     Long basketId = basket.getId();
 
-    Mockito.when(basketService.memberRepository.findById(memberId)).thenReturn(optionalMember);
-    Mockito.when(basketService.basketRepository.findByIdAndMember(basketId, member)).thenReturn(optionalBasket);
+    Mockito.when(basketService.memberRepository.existsById(memberId)).thenReturn(true);
+    Mockito.when(basketService.basketRepository.findByIdAndMemberId(basketId, memberId)).thenReturn(optionalBasket);
     Optional<Product> optionalProduct = Optional
         .of(new Product(1L, "Test product", "details", new BigDecimal("20"), 20L, null));
 

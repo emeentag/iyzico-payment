@@ -4,11 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
-import com.iyzico.challenge.configuration.ApplicationConfiguration;
 import com.iyzico.challenge.entity.Product;
+import com.iyzico.challenge.middleware.exception.ResourceNotFoundException;
 import com.iyzico.challenge.repository.ProductRepository;
 import com.iyzico.challenge.service.ProductService;
 import com.iyzipay.model.BasketItem;
@@ -50,69 +49,47 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void addProduct_should_return_empty_when_has_id() {
-    // given
-    Product product = productWithId;
-
-    // when
-    Optional<Product> returnProduct = productService.addProduct(product);
-
-    // then
-    assertThat(returnProduct).isEmpty();
-  }
-
-  @Test
-  public void addProduct_should_return_product_when_has_not_id() throws Exception {
+  public void addProduct_should_return_product_after_save() throws Exception {
     // given
     Product product = productWithoutId;
-    Mockito.when(productRepository.save(product)).thenReturn(product);
+    Mockito.when(this.productRepository.save(product)).thenReturn(product);
 
     // when
-    Optional<Product> returnProduct = productService.addProduct(product);
+    Product returnProduct = this.productService.addProduct(product);
 
     // then
-    assertThat(returnProduct).isEqualTo(Optional.of(product));
-  }
-
-  @Test
-  public void updateProduct_should_return_empty_when_has_not_id() throws Exception {
-    // given
-    Product product = productWithoutId;
-
-    // when
-    Optional<Product> returnProduct = productService.updateProduct(product);
-
-    // then
-    assertThat(returnProduct).isEmpty();
+    assertThat(returnProduct).isEqualTo(product);
+    Mockito.verify(this.productRepository, Mockito.times(1)).save(product);
   }
 
   @Test
   public void updateProduct_should_return_product_when_has_id() throws Exception {
     // given
     Product product = productWithId;
-    Optional<Product> returnProduct = Optional.of(product);
-    Mockito.when(productRepository.save(product)).thenReturn(product);
-    Mockito.when(productRepository.findById(product.getId())).thenReturn(returnProduct);
+    product.setName("Updated Name");
+    Product productInDB = new Product(1L, "Test Product", "Product details", BigDecimal.valueOf(120L), 20L, null);
+    Optional<Product> returnProduct = Optional.of(productInDB);
+    Mockito.when(this.productRepository.save(product)).thenReturn(product);
+    Mockito.when(this.productRepository.findById(product.getId())).thenReturn(returnProduct);
 
     // when
-    returnProduct = productService.updateProduct(product);
+    returnProduct = this.productService.updateProduct(product);
 
     // then
-    assertThat(returnProduct).isEqualTo(Optional.of(product));
+    assertThat(returnProduct.get().getName()).isEqualTo(product.getName());
   }
 
-  @Test
-  public void updateProduct_should_return_empty_when_is_not_present() throws Exception {
+  @Test(expected = ResourceNotFoundException.class)
+  public void updateProduct_should_throw_exception_when_not_found_on_db() throws Exception {
     // given
     Product product = productWithId;
     Optional<Product> returnProduct = Optional.empty();
-    Mockito.when(productRepository.findById(product.getId())).thenReturn(returnProduct);
+    Mockito.when(this.productRepository.findById(product.getId())).thenReturn(returnProduct);
 
     // when
-    returnProduct = productService.updateProduct(product);
+    returnProduct = this.productService.updateProduct(product);
 
-    // then
-    assertThat(returnProduct).isEmpty();
+    // then throw exception
   }
 
   @Test
@@ -130,19 +107,15 @@ public class ProductServiceTest {
 
   @Test
   public void getProducts_should_return_products() throws Exception {
-    // given
-    this.productService.applicationConfiguration = Mockito.mock(ApplicationConfiguration.class);
-    Mockito.when(this.productService.applicationConfiguration.getItemsInSinglePage()).thenReturn(10);
-
     Product product = productWithId;
     Page<Product> page = new PageImpl<>(Arrays.asList(product, product));
     Mockito.when(productRepository.findAll(PageRequest.of(0, 10))).thenReturn(page);
 
     // when
-    List<Product> returnProduct = productService.getProducts(0);
+    Page<Product> returnProduct = productService.getProducts(PageRequest.of(0, 10));
 
     // then
-    assertThat(returnProduct.size()).isEqualTo(2);
+    assertThat(returnProduct.getContent().size()).isEqualTo(2);
   }
 
   @Test
@@ -158,18 +131,16 @@ public class ProductServiceTest {
     assertThat(returnProduct).isEqualTo(returnProduct);
   }
 
-  @Test
-  public void deleteProduct_should_return_empty_when_there_is_sth_do_delete() throws Exception {
+  @Test(expected = ResourceNotFoundException.class)
+  public void deleteProduct_should_throw_exception_when_there_is_nothing_delete() throws Exception {
     // given
     Product product = productWithId;
     Mockito.when(productRepository.findById(product.getId())).thenReturn(Optional.empty());
 
     // when
-    Optional<Product> returnProduct = productService.deleteProduct(product.getId());
+    productService.deleteProduct(product.getId());
 
-    // then
-    assertThat(returnProduct).isEmpty();
-    ;
+    // then throw exception
   }
 
   @Test

@@ -1,25 +1,24 @@
 package com.iyzico.challenge.entity;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * Member
  */
 @Entity
 @Data
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-public class Member {
+@NoArgsConstructor
+public class Member extends Auditable {
 
   @Id
   @GeneratedValue
@@ -30,11 +29,4 @@ public class Member {
 
   @Column(name = "email", columnDefinition = "VARCHAR(120)")
   private String email;
-
-  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-  private Set<Basket> baskets;
-
-  public Member() {
-    this.baskets = new HashSet<>();
-  }
 }

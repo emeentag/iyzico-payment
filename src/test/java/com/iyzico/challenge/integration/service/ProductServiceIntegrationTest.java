@@ -4,14 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 
 import com.iyzico.challenge.configuration.ApplicationConfiguration;
 import com.iyzico.challenge.entity.Basket;
 import com.iyzico.challenge.entity.Basket.BasketStatus;
-import com.iyzico.challenge.entity.Member;
 import com.iyzico.challenge.entity.Product;
+import com.iyzico.challenge.middleware.exception.ResourceNotFoundException;
 import com.iyzico.challenge.repository.ProductRepository;
 import com.iyzico.challenge.service.ProductService;
 
@@ -23,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -44,46 +45,33 @@ public class ProductServiceIntegrationTest {
   @MockBean
   public ApplicationConfiguration applicationConfiguration;
 
-  private Member member;
-
   private Basket basket;
 
   private Product product;
 
   @Before
   public void setUp() {
-    member = new Member(null, "Test Member", "test@test.com", new HashSet<>());
-    basket = new Basket(null, member, new HashSet<>(), BasketStatus.NOT_PAYED);
+    basket = new Basket(null, null, new HashSet<>(), BasketStatus.NOT_PAYED);
     product = new Product(null, "Test Product", "Test details", new BigDecimal("20"), 10L, new HashSet<>());
 
-    member.getBaskets().add(basket);
     basket.getProducts().add(product);
 
     this.productRepository.save(product);
   }
 
   @Test
-  public void addProduct_should_save_if_not_in_db() {
+  public void addProduct_should_save_and_return_saved_product() {
     // given
     Product p = new Product(null, "Test Product", "Test details", new BigDecimal("10"), 10L, new HashSet<>());
 
     // when
-    Optional<Product> expectedProduct = this.productService.addProduct(p);
+    Product expectedProduct = this.productService.addProduct(p);
     Optional<Product> productInDB = this.productRepository.findById(2L);
 
     // then
-    assertThat(expectedProduct.get().getId()).isEqualTo(productInDB.get().getId());
-    assertThat(expectedProduct.get().getName()).isEqualTo(productInDB.get().getName());
-    assertThat(expectedProduct.get().getPrice()).isEqualTo(productInDB.get().getPrice());
-  }
-
-  @Test
-  public void addProduct_should_not_save_if_exist_in_db() {
-    // when
-    Optional<Product> expectedProduct = this.productService.addProduct(product);
-
-    // then
-    assertThat(expectedProduct).isEmpty();
+    assertThat(expectedProduct.getId()).isEqualTo(productInDB.get().getId());
+    assertThat(expectedProduct.getName()).isEqualTo(productInDB.get().getName());
+    assertThat(expectedProduct.getPrice()).isEqualTo(productInDB.get().getPrice());
   }
 
   @Test
@@ -98,7 +86,6 @@ public class ProductServiceIntegrationTest {
   @Test
   public void getProducts_should_return_product_inPage() {
     // given
-    Mockito.when(this.applicationConfiguration.getItemsInSinglePage()).thenReturn(2);
     Product p1 = new Product(null, "Test Product", "Test details", new BigDecimal("10"), 10L, new HashSet<>());
     Product p2 = new Product(null, "Test Product", "Test details", new BigDecimal("10"), 10L, new HashSet<>());
 
@@ -106,16 +93,16 @@ public class ProductServiceIntegrationTest {
     this.productRepository.save(p2);
 
     // when
-    List<Product> expectedProducts = this.productService.getProducts(0);
+    Page<Product> expectedProducts = this.productService.getProducts(PageRequest.of(0, 2));
 
     // then
-    assertThat(expectedProducts.size()).isEqualTo(2);
+    assertThat(expectedProducts.getContent().size()).isEqualTo(2);
 
     // when
-    expectedProducts = this.productService.getProducts(1);
+    expectedProducts = this.productService.getProducts(PageRequest.of(1, 2));
 
     // then
-    assertThat(expectedProducts.size()).isEqualTo(1);
+    assertThat(expectedProducts.getContent().size()).isEqualTo(1);
   }
 
   @Test
@@ -130,13 +117,26 @@ public class ProductServiceIntegrationTest {
     assertThat(expectedProduct.get().getName()).isEqualTo(product.getName());
   }
 
+  @Test(expected = ResourceNotFoundException.class)
+  public void updateProduct_should_throw_exception_if_not_product_exist() {
+    // given
+    Product p1 = new Product(2000L, "Test Product", "Test details", new BigDecimal("10"), 10L, new HashSet<>());
+
+    // when
+    this.productService.updateProduct(p1);
+
+    // then throw exception
+  }
+
   @Test(expected = InvalidDataAccessApiUsageException.class)
-  public void updateProduct_should_not_update_product_if_not_exist() {
+  public void updateProduct_should_throw_exception_if_no_product_id() {
     // given
     Product p1 = new Product(null, "Test Product", "Test details", new BigDecimal("10"), 10L, new HashSet<>());
 
     // when
     this.productService.updateProduct(p1);
+
+    // then throw exception
   }
 
   @Test
@@ -152,8 +152,8 @@ public class ProductServiceIntegrationTest {
     Mockito.verify(this.productService.productRepository, Mockito.atLeast(1)).delete(product);
   }
 
-  @Test
-  public void deleteProduct_should_not_delete_product_if_not_exist() {
+  @Test(expected = ResourceNotFoundException.class)
+  public void deleteProduct_should_throw_exception_product_if_not_exist() {
     // given
     this.productService.productRepository = Mockito.mock(ProductRepository.class);
     Mockito.when(this.productService.productRepository.findById(product.getId())).thenReturn(Optional.empty());
@@ -161,8 +161,7 @@ public class ProductServiceIntegrationTest {
     // when
     this.productService.deleteProduct(product.getId());
 
-    // then
-    Mockito.verify(this.productService.productRepository, Mockito.never()).delete(product);
+    // then throw exception
   }
 
 }

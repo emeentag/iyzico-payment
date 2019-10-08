@@ -23,7 +23,4 @@ public class ApplicationConfiguration {
     @Value("${spring.application.payment.apiUrl}")
     private String paymentApiUrl;
 
-    @Value("${spring.application.itemsInSinglePage}")
-    private Integer itemsInSinglePage;
-
 }

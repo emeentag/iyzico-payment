@@ -2,11 +2,11 @@ package com.iyzico.challenge.integration.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.HashSet;
 import java.util.Optional;
 
 import com.iyzico.challenge.configuration.ApplicationConfiguration;
 import com.iyzico.challenge.entity.Member;
+import com.iyzico.challenge.middleware.exception.ResourceNotFoundException;
 import com.iyzico.challenge.repository.MemberRepository;
 import com.iyzico.challenge.service.MemberService;
 
@@ -43,33 +43,24 @@ public class MemberServiceIntegrationTest {
 
   @Before
   public void setUp() {
-    member = new Member(null, "Test Member", "test@test.com", new HashSet<>());
+    member = new Member(null, "Test Member", "test@test.com");
 
     this.memberRepository.save(member);
   }
 
   @Test
-  public void addMember_should_save_if_not_in_db() {
+  public void addMember_should_save_and_return_saved_member() {
     // given
-    Member m = new Member(null, "Test Member", "test@test.com", new HashSet<>());
+    Member m = new Member(null, "Test Member", "test@test.com");
 
     // when
-    Optional<Member> expectedMember = this.memberService.addMember(m);
+    Member expectedMember = this.memberService.addMember(m);
     Optional<Member> memberInDB = this.memberRepository.findById(2L);
 
     // then
-    assertThat(expectedMember.get().getId()).isEqualTo(memberInDB.get().getId());
-    assertThat(expectedMember.get().getName()).isEqualTo(memberInDB.get().getName());
-    assertThat(expectedMember.get().getEmail()).isEqualTo(memberInDB.get().getEmail());
-  }
-
-  @Test
-  public void addMember_should_not_save_if_exist_in_db() {
-    // when
-    Optional<Member> expectedMember = this.memberService.addMember(member);
-
-    // then
-    assertThat(expectedMember).isEmpty();
+    assertThat(expectedMember.getId()).isEqualTo(memberInDB.get().getId());
+    assertThat(expectedMember.getName()).isEqualTo(memberInDB.get().getName());
+    assertThat(expectedMember.getEmail()).isEqualTo(memberInDB.get().getEmail());
   }
 
   @Test
@@ -93,13 +84,26 @@ public class MemberServiceIntegrationTest {
     assertThat(expectedMember.get().getEmail()).isEqualTo(member.getEmail());
   }
 
-  @Test(expected = InvalidDataAccessApiUsageException.class)
-  public void updateMember_should_not_update_member_if_not_exist() {
+  @Test(expected = ResourceNotFoundException.class)
+  public void updateMember_should_throw_exception_if_not_member_exist() {
     // given
-    Member m1 = new Member(null, "Test Member", "test@test.com", new HashSet<>());
+    Member m1 = new Member(200L, "Test Member", "test@test.com");
 
     // when
-   this.memberService.updateMember(m1);
+    this.memberService.updateMember(m1);
+
+    // then throw exception
+  }
+
+  @Test(expected = InvalidDataAccessApiUsageException.class)
+  public void updateMember_should_throw_exception_if_no_member_id() {
+    // given
+    Member m1 = new Member(null, "Test Member", "test@test.com");
+
+    // when
+    this.memberService.updateMember(m1);
+
+    // then throw exception
   }
 
   @Test
@@ -115,7 +119,7 @@ public class MemberServiceIntegrationTest {
     Mockito.verify(this.memberService.memberRepository, Mockito.atLeast(1)).delete(member);
   }
 
-  @Test
+  @Test(expected = ResourceNotFoundException.class)
   public void deleteMember_should_not_delete_member_if_not_exist() {
     // given
     this.memberService.memberRepository = Mockito.mock(MemberRepository.class);
@@ -124,8 +128,7 @@ public class MemberServiceIntegrationTest {
     // when
     this.memberService.deleteMember(member.getId());
 
-    // then
-    Mockito.verify(this.memberService.memberRepository, Mockito.never()).delete(member);
+    // then throw exception
   }
 
 }

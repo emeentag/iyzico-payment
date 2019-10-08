@@ -17,4 +17,3 @@ spring:
       apiKey: sandbox-Hx6DvxaWsTe8KkX9IixOCLhdye4YrzoA
       apiSecretKey: sandbox-SxBzSskY6zIg038BcqoUNzUxyVL1FnFU
       apiUrl: https://sandbox-api.iyzipay.com
-    itemsInSinglePage: 10
