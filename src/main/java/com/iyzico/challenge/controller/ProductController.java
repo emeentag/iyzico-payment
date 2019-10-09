@@ -42,7 +42,7 @@ public class ProductController {
   }
 
   @GetMapping(value = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
-  public Page<Product> getProducts(@RequestParam(required = false) Pageable pageable) {
+  public Page<Product> getProducts(Pageable pageable) {
     return this.productService.getProducts(pageable);
   }
 
@@ -71,7 +71,7 @@ public class ProductController {
     Optional<Product> p = this.productService.deleteProduct(id);
 
     if (p.isPresent()) {
-      response = ResponseEntity.ok("Product deletd.");
+      response = ResponseEntity.ok("Product deleted.");
     } else {
       response = ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }

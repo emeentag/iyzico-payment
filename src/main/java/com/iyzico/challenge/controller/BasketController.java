@@ -67,7 +67,7 @@ public class BasketController {
     return response;
   }
 
-  @DeleteMapping(value = "/basket", produces = MediaType.TEXT_HTML_VALUE)
+  @DeleteMapping(value = "/basket/product", produces = MediaType.TEXT_HTML_VALUE)
   public ResponseEntity<String> deleteProductFromBasket(
       @RequestParam(required = true, name = "basket_id") Long basketId,
       @RequestParam(required = true, name = "product_id") Long productId) {
