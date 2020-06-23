@@ -11,6 +11,6 @@ spring:
       use-new-id-generator-mappings: false
   application:
     payment:
-      apiKey: sandbox-Hx6DvxaWsTe8KkX9IixOCLhdye4YrzoA
-      apiSecretKey: sandbox-SxBzSskY6zIg038BcqoUNzUxyVL1FnFU
+      apiKey: YOUR_API_KEY
+      apiSecretKey: YOUR_SECRET_KEY
       apiUrl: https://sandbox-api.iyzipay.com
